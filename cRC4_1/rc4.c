@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define BYTE_CONSTRAINT 256
 
 // print the bits for debugging
-void printbits(unsigned char bits[])
+void printbits(unsigned char *bits)
 {
   int i;
   for (i = 0; i < BYTE_CONSTRAINT; i++) {
@@ -19,23 +20,25 @@ void printbits(unsigned char bits[])
 
 
 // RC4 KSA (key scheduling algorithm)
-void ksa(unsigned char k[], unsigned char s[])
+void ksa(char *k, unsigned char *s)
 {
   int i;
   for (i = 0; i < BYTE_CONSTRAINT; i++) {
     s[i] = i;
   }
+  printf(k);
   printbits(s);// look at the bits in order
+  int klen = strlen(k);
   int j = 0;
   for (i = 0; i < BYTE_CONSTRAINT; i++)
   {
-
-    j = (j + s[i] + k[i % strlen(k)]) % BYTE_CONSTRAINT;
-
-    char c = s[i];
+    j = (j + s[i] + k[i % klen]) % BYTE_CONSTRAINT;
+    unsigned char c = s[i];
     s[i] = s[j];
     s[j] = c;
   }
+  printf(k);
+  printbits(s);
 }
 
 
@@ -48,7 +51,7 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
   {
     i = (i + 1) % BYTE_CONSTRAINT;
     j = (j + s[i]) % BYTE_CONSTRAINT;
-    char c = s[i];
+    unsigned char c = s[i];
     s[i] = s[j];
     s[j] = c;
     out[n] = s[(s[i] + s[j]) % BYTE_CONSTRAINT] ^ in[n];
@@ -57,17 +60,9 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
 
 int main()
 {
-  char key[] = "hello from rc4.";
-  // char key[5];
-  //int i;
-  // for (i = 1; i <= 5; i++)
-  // {
-  //   key[i] = i;
-  //   printf("%s", key[i]);
-  // }
-
+  char *key = "This is the Key";
   char *pt = "This is some plaintext";
-  printf(key);
+  printf(pt);
   printf("\n");
   // the bytes that start out as 0x00 and go through 0xFF
   unsigned char bytes[BYTE_CONSTRAINT];
@@ -76,7 +71,7 @@ int main()
 
   printbits(bytes);
 
-  unsigned char ct[BYTE_CONSTRAINT];
+  unsigned char *ct = malloc(sizeof(int) * strlen(pt));
   pgra(key, bytes, pt, ct);
 
   printbits(ct);
@@ -85,10 +80,10 @@ int main()
   {
     printf("%02hhx", ct[i]);
   }
-
+  printf("\n\n");
   printf(ct);
-  printf("\n");
-  unsigned char pt2[BYTE_CONSTRAINT];
+  printf("\n\n");
+  unsigned char *pt2 = malloc(sizeof(int) * strlen(ct));
   pgra(key, bytes, ct, pt2);
   printf(pt2);
   printf("\n");
