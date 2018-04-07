@@ -53,8 +53,8 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
 
 int main()
 {
-   char *key = 0x0102030405;
-   char *pt = "Encript this text with rc4.";
+   char *key = "This is a key.";
+   char *pt = "This is some plaintext";
    printf(key);
    printf("\n");
    // the bytes that start out as 0x00 and go through 0xFF
@@ -67,7 +67,7 @@ int main()
    unsigned char ct[BYTE_CONSTRAINT];
    pgra(key, bytes, pt, ct);
 
-   printbits(output);
+   printbits(ct);
    int i;
    for (i = 0; i < strlen(pt); i++)
    {
