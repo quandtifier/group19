@@ -27,8 +27,11 @@ void ksa(unsigned char k[], unsigned char s[])
   }
   printbits(s);// look at the bits in order
   int j = 0;
-  for (i = 0; i < BYTE_CONSTRAINT; i++) {
+  for (i = 0; i < BYTE_CONSTRAINT; i++)
+  {
+
     j = (j + s[i] + k[i % strlen(k)]) % BYTE_CONSTRAINT;
+
     char c = s[i];
     s[i] = s[j];
     s[j] = c;
@@ -41,7 +44,8 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
 {
   int i,j,n;
   i=j=n=0;
-  for (n = 0; n < strlen(k); n++) {
+  for (;n < strlen(in); n++)
+  {
     i = (i + 1) % BYTE_CONSTRAINT;
     j = (j + s[i]) % BYTE_CONSTRAINT;
     char c = s[i];
@@ -53,27 +57,42 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
 
 int main()
 {
-   char *key = "This is a key.";
-   char *pt = "This is some plaintext";
-   printf(key);
-   printf("\n");
-   // the bytes that start out as 0x00 and go through 0xFF
-   unsigned char bytes[BYTE_CONSTRAINT];
+  char key[] = "hello from rc4.";
+  // char key[5];
+  //int i;
+  // for (i = 1; i <= 5; i++)
+  // {
+  //   key[i] = i;
+  //   printf("%s", key[i]);
+  // }
 
-   ksa(key, bytes);
+  char *pt = "This is some plaintext";
+  printf(key);
+  printf("\n");
+  // the bytes that start out as 0x00 and go through 0xFF
+  unsigned char bytes[BYTE_CONSTRAINT];
 
-   printbits(bytes);
+  ksa(key, bytes);
 
-   unsigned char ct[BYTE_CONSTRAINT];
-   pgra(key, bytes, pt, ct);
+  printbits(bytes);
 
-   printbits(ct);
-   int i;
-   for (i = 0; i < strlen(pt); i++)
-   {
-     printf("%02hhX", ct[i]);
-   }
+  unsigned char ct[BYTE_CONSTRAINT];
+  pgra(key, bytes, pt, ct);
 
-   printf("\n\nhello from end of file!!\n\n");
-   return 0;
+  printbits(ct);
+  int i;
+  for (i = 0; i < strlen(pt); i++)
+  {
+    printf("%02hhx", ct[i]);
+  }
+
+  printf(ct);
+  printf("\n");
+  unsigned char pt2[BYTE_CONSTRAINT];
+  pgra(key, bytes, ct, pt2);
+  printf(pt2);
+  printf("\n");
+
+  printf("\n\nhello from end of file!!\n\n");
+  return 0;
 }
