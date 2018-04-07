@@ -19,7 +19,7 @@ void printbits(unsigned char bits[])
 
 
 // RC4 KSA (key scheduling algorithm)
-void ksa(char k[], unsigned char s[])
+void ksa(unsigned char k[], unsigned char s[])
 {
   int i;
   for (i = 0; i < BYTE_CONSTRAINT; i++) {
@@ -37,7 +37,7 @@ void ksa(char k[], unsigned char s[])
 
 
 // RSA PGRA (psuedo-random generation algorithm)
-void pgra(char k[], unsigned char s[], unsigned char out[])
+void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned char out[])
 {
   int i,j,n;
   i=j=n=0;
@@ -47,13 +47,14 @@ void pgra(char k[], unsigned char s[], unsigned char out[])
     char c = s[i];
     s[i] = s[j];
     s[j] = c;
-    out[n] = s[(s[i] + s[j]) % BYTE_CONSTRAINT];
+    out[n] = s[(s[i] + s[j]) % BYTE_CONSTRAINT] ^ in[n];
   }
 }
 
 int main()
 {
-   char *key = "HelloRC4c";
+   char *key = 0x0102030405;
+   char *pt = "Encript this text with rc4.";
    printf(key);
    printf("\n");
    // the bytes that start out as 0x00 and go through 0xFF
@@ -63,10 +64,16 @@ int main()
 
    printbits(bytes);
 
-   char output[BYTE_CONSTRAINT];
-   pgra(key, bytes, output);
+   unsigned char ct[BYTE_CONSTRAINT];
+   pgra(key, bytes, pt, ct);
 
    printbits(output);
+   int i;
+   for (i = 0; i < strlen(pt); i++)
+   {
+     printf("%02hhX", ct[i]);
+   }
 
+   printf("\n\nhello from end of file!!\n\n");
    return 0;
 }
