@@ -60,7 +60,7 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
 
 int main()
 {
-  char *key = "This is the Key";
+  char *key = "This is the key";
   char *pt = "This is some plaintext";
   printf(pt);
   printf("\n");
@@ -83,7 +83,10 @@ int main()
   printf("\n\n");
   printf(ct);
   printf("\n\n");
+
   unsigned char *pt2 = malloc(sizeof(int) * strlen(ct));
+
+  ksa(key, bytes);
   pgra(key, bytes, ct, pt2);
   printf(pt2);
   printf("\n");
