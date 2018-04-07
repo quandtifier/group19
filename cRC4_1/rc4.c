@@ -37,7 +37,7 @@ void ksa(char k[], unsigned char s[])
 
 
 // RSA PGRA (psuedo-random generation algorithm)
-char* pgra(char k[], unsigned char s[], unsigned char out[])
+void pgra(char k[], unsigned char s[], unsigned char out[])
 {
   int i,j,n;
   i=j=n=0;
@@ -49,36 +49,24 @@ char* pgra(char k[], unsigned char s[], unsigned char out[])
     s[j] = c;
     out[n] = s[(s[i] + s[j]) % BYTE_CONSTRAINT];
   }
-  return out;
 }
 
-
-int main(int argc, char *argv[])
+int main()
 {
-  if (argc < 3) {
-    return -1;
-  }
-  // the bytes that start out as 0x00 and go through 0xFF
-  unsigned char bytes[BYTE_CONSTRAINT];
-  // key scheduling algorithm
-  ksa(arg[1], bytes);
+   char *key = "HelloRC4c";
+   printf(key);
+   printf("\n");
+   // the bytes that start out as 0x00 and go through 0xFF
+   unsigned char bytes[BYTE_CONSTRAINT];
 
-  printbits(bytes);
+   ksa(key, bytes);
 
-  unsigned char result = malloc(sizeof(char, * argv[2]));
-  // psuedo-random generation algorithm
-  pgra(key, argv[2], result);
+   printbits(bytes);
 
-  printbits(result);
+   char output[BYTE_CONSTRAINT];
+   pgra(key, bytes, output);
+
+   printbits(output);
+
+   return 0;
 }
-
-   // // for debugging check to ensure no duplicates valued bytes
-   // for (i = 0; i < BYTE_CONSTRAINT; i++) {
-   //   int j;
-   //   for (j = 0; j < BYTE_CONSTRAINT; j++) {
-   //      if (bytes[i] == bytes[j] && i != j) {
-   //        printf("something went wrong there are dupicates!!!");
-   //      }
-   //   }
-   // }
-   // return 0;
