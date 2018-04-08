@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define BYTE_CONSTRAINT 256
 
@@ -25,7 +26,7 @@ void printData(unsigned char data[], int strlen)
   {
     printf("%02hhx", data[i]);
   }
-  printf("\n\n");
+  printf("\n\n\n");
 }
 
 // RC4 KSA (key scheduling algorithm)
@@ -60,7 +61,6 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
     s[i] = s[j];
     s[j] = c;
     out[n] = s[(s[i] + s[j]) % BYTE_CONSTRAINT] ^ in[n];
-    out[n+1] = 0;
   }
 }
 
@@ -92,25 +92,34 @@ int main(int argc, char *argv[])
   pt[fsize] = 0;
   // get the key from the commandline
   char *key = argv[2];
-  // the bytes that start out as 0x00 and go through 0xFF
+
+  // the keystream byte array
   unsigned char bytes[BYTE_CONSTRAINT];
 
   // the first (encryption) run of RC4
+  clock_t t;
+  t = clock();//start timing
   ksa(key, bytes, fsize);
   unsigned char *ct = malloc(fsize + 1);
   pgra(key, bytes, pt, ct, fsize);
   ct[fsize] = 0;
-  printf("The original data:\n\n");
+  t = clock() - t;//calculate total time for RC4
+  double t1Seconds = ((double)t)/CLOCKS_PER_SEC;
+  printf("The original data:");
   printData(pt, fsize);
-  printf("The encrypted data:\n\n");
+  printf("Encryption elapsed time: %f seconds\nEncypted data:", t1Seconds );
   printData(ct, fsize);
-
+  
+  t = clock();//start time for decryption
   unsigned char *pt2 = malloc(fsize + 1);
   ksa(key, bytes, fsize);
   pgra(key, bytes, ct, pt2, fsize);
-
-  printf("The decrypted data:\n\n");
+  t = clock() - t;//calculate decrytption time
+  double t2Seconds = ((double)t)/CLOCKS_PER_SEC;
+  printf("Decryption elapsed time: %f seconds\nDecrypted data:",  t2Seconds);
   printData(pt2, fsize);
+  double totalSeconds = t1Seconds + t2Seconds;
+  printf("Total ellapsed processing time for encyption and decryption: %f seconds\n", totalSeconds);
 
   return 0;
 }
