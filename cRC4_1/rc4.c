@@ -16,13 +16,12 @@ void printbits(unsigned char *bits)
   }
   printf("Line break\n\n");
 }
-
-void printData(unsigned char data[])
+// prints hex representation of data
+void printData(unsigned char data[], int strlen)
 {
   printf("\n\n");
-
   int i;
-  for (i = 0; i < strlen(data); i++)
+  for (i = 0; i < strlen; i++)
   {
     printf("%02hhx", data[i]);
   }
@@ -30,17 +29,17 @@ void printData(unsigned char data[])
 }
 
 // RC4 KSA (key scheduling algorithm)
-void ksa(char *k, unsigned char *s)
+void ksa(char *k, unsigned char *s, int strlen)
 {
   int i;
   for (i = 0; i < BYTE_CONSTRAINT; i++) {
     s[i] = i;
   }
-  int klen = strlen(k);
+
   int j = 0;
   for (i = 0; i < BYTE_CONSTRAINT; i++)
   {
-    j = (j + s[i] + k[i % klen]) % BYTE_CONSTRAINT;
+    j = (j + s[i] + k[i % strlen]) % BYTE_CONSTRAINT;
     unsigned char c = s[i];
     s[i] = s[j];
     s[j] = c;
@@ -49,11 +48,11 @@ void ksa(char *k, unsigned char *s)
 
 
 // RSA PGRA (psuedo-random generation algorithm)
-void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned char out[])
+void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned char out[], int strlen)
 {
   int i,j,n;
   i=j=n=0;
-  for (;n < strlen(in); n++)
+  for (;n < strlen; n++)
   {
     i = (i + 1) % BYTE_CONSTRAINT;
     j = (j + s[i]) % BYTE_CONSTRAINT;
@@ -61,6 +60,7 @@ void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned cha
     s[i] = s[j];
     s[j] = c;
     out[n] = s[(s[i] + s[j]) % BYTE_CONSTRAINT] ^ in[n];
+    out[n+1] = 0;
   }
 }
 
@@ -96,21 +96,21 @@ int main(int argc, char *argv[])
   unsigned char bytes[BYTE_CONSTRAINT];
 
   // the first (encryption) run of RC4
-  ksa(key, bytes);
-  unsigned char *ct = malloc(sizeof(int) * strlen(pt));
-  pgra(key, bytes, pt, ct);
-
+  ksa(key, bytes, fsize);
+  unsigned char *ct = malloc(fsize + 1);
+  pgra(key, bytes, pt, ct, fsize);
+  ct[fsize] = 0;
   printf("The original data:\n\n");
-  printData(pt);
+  printData(pt, fsize);
   printf("The encrypted data:\n\n");
-  printData(ct);
+  printData(ct, fsize);
 
-  unsigned char *pt2 = malloc(sizeof(int) * strlen(ct));
-  ksa(key, bytes);
-  pgra(key, bytes, ct, pt2);
+  unsigned char *pt2 = malloc(fsize + 1);
+  ksa(key, bytes, fsize);
+  pgra(key, bytes, ct, pt2, fsize);
 
   printf("The decrypted data:\n\n");
-  printData(pt2);
+  printData(pt2, fsize);
 
   return 0;
 }
