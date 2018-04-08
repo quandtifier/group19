@@ -107,19 +107,19 @@ int main(int argc, char *argv[])
   double t1Seconds = ((double)t)/CLOCKS_PER_SEC;
   printf("The original data:");
   printData(pt, fsize);
-  printf("Encryption elapsed time: %f seconds\nEncypted data:", t1Seconds );
+  printf("Encryption elapsed time: %f seconds\nEncrypted data:", t1Seconds );
   printData(ct, fsize);
   
   t = clock();//start time for decryption
   unsigned char *pt2 = malloc(fsize + 1);
   ksa(key, bytes, fsize);
   pgra(key, bytes, ct, pt2, fsize);
-  t = clock() - t;//calculate decrytption time
+  t = clock() - t;//calculate decryption time
   double t2Seconds = ((double)t)/CLOCKS_PER_SEC;
   printf("Decryption elapsed time: %f seconds\nDecrypted data:",  t2Seconds);
   printData(pt2, fsize);
   double totalSeconds = t1Seconds + t2Seconds;
-  printf("Total ellapsed processing time for encyption and decryption: %f seconds\n", totalSeconds);
+  printf("Total elapsed processing time for encryption and decryption: %f seconds\n", totalSeconds);
 
   return 0;
 }
