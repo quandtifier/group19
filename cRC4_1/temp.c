@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define BYTE_CONSTRAINT 256
 
-void printbits(unsigned char bits[])
+// print the bits for debugging
+void printbits(unsigned char *bits)
 {
-  // print the bits for debugging
   int i;
   for (i = 0; i < BYTE_CONSTRAINT; i++) {
     int j;
@@ -16,58 +17,80 @@ void printbits(unsigned char bits[])
   printf("Line break\n\n");
 }
 
-void ksa(char k[], unsigned char s[])
+
+
+// RC4 KSA (key scheduling algorithm)
+void ksa(char *k, unsigned char *s)
 {
   int i;
   for (i = 0; i < BYTE_CONSTRAINT; i++) {
     s[i] = i;
   }
-  printbits(s);
-
-  // RC4 KSA (key scheduling algorithm)
+  printf(k);
+  printbits(s);// look at the bits in order
+  int klen = strlen(k);
   int j = 0;
-  for (i = 0; i < BYTE_CONSTRAINT; i++) {
-    j = (j + s[i] + k[i % strlen(k)]) % BYTE_CONSTRAINT;
-    char c = s[i];
+  for (i = 0; i < BYTE_CONSTRAINT; i++)
+  {
+    j = (j + s[i] + k[i % klen]) % BYTE_CONSTRAINT;
+    unsigned char c = s[i];
     s[i] = s[j];
     s[j] = c;
+  }
+  printf(k);
+  printbits(s);
+}
+
+
+// RSA PGRA (psuedo-random generation algorithm)
+void pgra(unsigned char k[], unsigned char s[], unsigned char in[], unsigned char out[])
+{
+  int i,j,n;
+  i=j=n=0;
+  for (;n < strlen(in); n++)
+  {
+    i = (i + 1) % BYTE_CONSTRAINT;
+    j = (j + s[i]) % BYTE_CONSTRAINT;
+    unsigned char c = s[i];
+    s[i] = s[j];
+    s[j] = c;
+    out[n] = s[(s[i] + s[j]) % BYTE_CONSTRAINT] ^ in[n];
   }
 }
 
 int main()
 {
-   char *key = "HelloRC4c";
-   printf(key);
-   printf("\n");
-   // the bytes that start out as 0x00 and go through 0xFF
-   unsigned char bytes[BYTE_CONSTRAINT];
+  char *key = "This is the key";
+  char *pt = "This is some plaintext";
+  printf(pt);
+  printf("\n");
+  // the bytes that start out as 0x00 and go through 0xFF
+  unsigned char bytes[BYTE_CONSTRAINT];
 
-   ksa(key, bytes);
+  ksa(key, bytes);
 
-   printbits(bytes);
-   // RSA PGRA (psuedo-random generation algorithm)
-   int i,j,n;
-   i=j=n=0;
-   unsigned char out[256];
-   for (n = 0; n < strlen(key); n++) {
-     i = (i + 1) % BYTE_CONSTRAINT;
-     j = (j + bytes[i]) % BYTE_CONSTRAINT;
-     char c = bytes[i];
-     bytes[i] = bytes[j];
-     bytes[j] = c;
-     out[n] = bytes[(bytes[i] + bytes[j]) % BYTE_CONSTRAINT];
-   }
+  printbits(bytes);
 
-   printbits(out);
+  unsigned char *ct = malloc(sizeof(int) * strlen(pt));
+  pgra(key, bytes, pt, ct);
+
+  printbits(ct);
+  int i;
+  for (i = 0; i < strlen(pt); i++)
+  {
+    printf("%02hhx", ct[i]);
+  }
+  printf("\n\n");
+  printf(ct);
+  printf("\n\n");
+
+  unsigned char *pt2 = malloc(sizeof(int) * strlen(ct));
+
+  ksa(key, bytes);
+  pgra(key, bytes, ct, pt2);
+  printf(pt2);
+  printf("\n");
+
+  printf("\n\nhello from end of file!!\n\n");
+  return 0;
 }
-
-   // // for debugging check to ensure no duplicates valued bytes
-   // for (i = 0; i < BYTE_CONSTRAINT; i++) {
-   //   int j;
-   //   for (j = 0; j < BYTE_CONSTRAINT; j++) {
-   //      if (bytes[i] == bytes[j] && i != j) {
-   //        printf("something went wrong there are dupicates!!!");
-   //      }
-   //   }
-   // }
-   // return 0;
